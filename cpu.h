@@ -10,6 +10,7 @@ unsigned char height;
 unsigned short screen[PIXELS];
 unsigned short programCounter;
 unsigned short AFReg;
+unsigned short stackPointer;
 
 bool loadGameToROM(char* fileName[]);
 void initializeSystem();

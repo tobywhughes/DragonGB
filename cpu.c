@@ -11,6 +11,7 @@ void initializeSystem()
 	}
 	programCounter = 0x0000;
 	AFReg = 0;
+	stackPointer = 0xFFFF;
 	
 	//Graphics
 	width = 160;
@@ -85,9 +86,49 @@ void cycleCPU()
 		programCounter = memoryMap[programCounter + 1] | (memoryMap[programCounter + 2] << 8);
 	}
 
+	//RST
+	else if ((opcode & 0xC7) == 0xC7)
+	{
+		unsigned char t = opcode & 0x38 >> 3;
+		
+		if(t == 0x0)
+			programCounter = 0x0000;
+		else if(t == 0x1)
+			programCounter = 0x0008;
+		else if(t == 0x2)
+			programCounter = 0x0010;
+		else if(t == 0x3)
+			programCounter = 0x0018;
+		else if(t == 0x4)
+			programCounter = 0x0020;
+		else if(t == 0x5)
+			programCounter = 0x0028;
+		else if(t == 0x6)
+			programCounter = 0x0030;
+		else if(t == 0x7)
+			programCounter = 0x0038;
+		else
+		{
+			printf("%x \n", opcode);
+			printf("%x \n", memoryMap[programCounter + 1]);
+			printf("%x \n", memoryMap[programCounter + 2]);
+			while(true)
+			{
+				;
+			}
+		}
+
+		stackPointer -= 1;
+		memoryMap[stackPointer] = 0x00;
+		stackPointer -= 1;
+		memoryMap[stackPointer] = programCounter & 0x00FF;
+		
+	}
+
 	//XOR & AND
 	else if((opcode & 0xF0) == 0xA0)
 	{
+		//SET FLAGS
 		//XOR Accumulator
 		if (opcode == 0xAF)
 		{
@@ -106,6 +147,11 @@ void cycleCPU()
 				;
 			}
 		}
+	}
+	//Nop
+	else if(opcode == 0x00)
+	{
+		programCounter += 1;
 	}
 	//Unknown opcode
 	else
